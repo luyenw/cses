@@ -1,6 +1,9 @@
 import mysql.connector
 import os 
 from datetime import datetime
+import json
+import requests
+
 
 def get_cnx():
     return mysql.connector.connect(user='root', password='Luyendkdk1',
@@ -45,3 +48,12 @@ def update_test_result(submission_id, testcase_id, user_output, verdict, code_ti
         print(f' [v] updated Result with verdict {verdict}')
     else:
         print(' [x] cannot update Result')
+
+def update_submission(submission_id, status):
+    cmd = 'update submissions set status=%s, updatedAt=%s where id=%s;'
+    params = (status, datetime.utcnow(), submission_id)
+    results = execute_update(cmd, params)
+    if results>0:
+        print(f' [v] updated submission with status {status}')
+    else:
+        print(' [x] cannot update submission')

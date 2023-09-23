@@ -1,9 +1,9 @@
-const Submission = require('../models/Submission')
-const Task = require('../models/Task')
-const User = require('../models/User')
-const send = require('../rabbitmq/sender')
+const Submission = require('../schemas/Submission')
+const Task = require('../schemas/Task')
+const User = require('../schemas/User')
 const {Validation} = require('../validations/validations')
 const crypto = require('crypto')
+const RabbitMQ = require('../rabbitmq/index')
 
 controller = {}
 module.exports = () =>{
@@ -11,12 +11,6 @@ module.exports = () =>{
         const task_id = req.params.id
         const user = await User.findOne({where: {username: res.locals.username}})
         const user_id = await user.dataValues.id
-        const submissions = await Submission.findAll({where: {task_id: task_id, user_id: user_id}})
-        return res.json(submissions)
-    }
-    controller.get2 = async (req, res)=>{
-        const task_id = req.params.id
-        const user_id = req.params.id2
         const submissions = await Submission.findAll({where: {task_id: task_id, user_id: user_id}})
         return res.json(submissions)
     }
@@ -46,7 +40,7 @@ module.exports = () =>{
             source_code: inp.source_code
         })
         // send to message queue
-        if(submission) send(JSON.stringify(submission.dataValues))
+        if(submission) RabbitMQ.getInstance().send('submissions', JSON.stringify(submission.dataValues))
         //
         return res.json(submission)
     }

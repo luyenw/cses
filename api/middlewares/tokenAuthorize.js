@@ -6,7 +6,6 @@ const tokenAuthorize = (req, res, next) =>{
     try {
         jwt.verify(token, process.env.ACCESS_SECRET_TOKEN)
         res.locals.username = jwt.decode(token).username
-        console.log(res.locals.username)
         next();
     } catch (e) {
         return res.json({'msg':e})

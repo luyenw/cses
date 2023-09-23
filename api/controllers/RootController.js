@@ -1,11 +1,9 @@
 const controller = {}
-const Task = require('../models/Task')
-const Submission = require('../models/Submission')
+const Task = require('../schemas/Task')
 const bcrypt = require('bcrypt')
-const User = require('../models/User')
+const User = require('../schemas/User')
 const jwt = require('jsonwebtoken')
 const {Validation} = require('../validations/validations')
-const session = require('express-session')
 module.exports=()=>{
     controller.get= async (req, res)=>{
         // var start = new Date()
@@ -55,9 +53,15 @@ module.exports=()=>{
             return res.status(422).json({'msg': 'username or password is not correct'})
         }
         const accessToken = jwt.sign({username: inp.username, password: user.password}, process.env.ACCESS_SECRET_TOKEN);
-        return res.cookie("access_token", accessToken, {
-            httpOnly: true
-        }).status(200).json({token: accessToken, user: user});
+        return res.setHeader(
+            'set-cookie', `access_token=${accessToken}`
+        ).status(200).send({token: accessToken, user: user});
+        
+    }
+    controller.globalData=async(req,res)=>{
+        console.log(res.locals.username)
+        const user = await User.findOne({where: {username: res.locals.username}})
+        return res.status(200).json(user)
     }
     return controller
 }

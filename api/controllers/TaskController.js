@@ -1,5 +1,5 @@
-const Task = require('../models/Task');
-const TestCase = require('../models/Testcase');
+const Task = require('../schemas/Task');
+const TestCase = require('../schemas/Testcase');
 const { Validation } = require('../validations/validations');
 const crypto = require('crypto')
 

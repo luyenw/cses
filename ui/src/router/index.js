@@ -3,6 +3,8 @@ import ProblemList from '@/components/pages/ProblemList'
 import ProblemDetail from '@/components/pages/ProblemDetail'
 import LoginPage from '@/components/pages/LoginPage'
 import SignupPage from '@/components/pages/SignupPage'
+import NotFound from '@/components/pages/NotFound'
+import ProfilePage from '@/components/pages/ProfilePage'
 const routes = [
     {
         path: '/',
@@ -20,6 +22,14 @@ const routes = [
     {
         path: '/signup',
         component: SignupPage
+    },
+    {
+        path: '/user/:id',
+        component: ProfilePage
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        component: NotFound
     }
 ]
 const router = createRouter({

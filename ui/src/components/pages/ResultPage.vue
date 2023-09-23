@@ -3,7 +3,7 @@
     Login to see your submissions.
     </div>
     <div v-else>
-        <SubmissionTable/>
+        <SubmissionTable :data="submissions"/>
     </div>
 </template>
 <script>
@@ -15,12 +15,16 @@
         const submissions = ref([])
         onMounted(async ()=>{
             try{
-                const response = await fetch(`http://localhost:3001/submit/${props.id}`, {method: 'GET', credentials: ''})
-                submissions.value = await response.json()
+                const response = await axios.get(`http://localhost:3001/submit/${props.id}`)
+                var results= await response.data
+                results.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt))
+                submissions.value = results
+                console.log(submissions.value)
             }catch(err){
                 alert(err)
             }
         })
+        return {submissions}
     }
     export default{
     name: "ResultPage",
@@ -29,7 +33,7 @@
         id: Number
     },
     computed: {
-        ...mapGetters(["isLoggedIn", "user"])
+        ...mapGetters(["isLoggedIn", "user"]),
     },
     components: { SubmissionTable }
 }

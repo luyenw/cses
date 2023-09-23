@@ -22,13 +22,19 @@ const Submission = sequelize.define('submissions', {
         allowNull: false,
     },
     lang: {
-      type: DataTypes.ENUM('C', 'C++', 'JAVA'),
+      type: DataTypes.ENUM('c', 'cpp', 'python'),
       allowNull: false,
+    },
+    status:{
+      type: DataTypes.STRING,
+      defaultValue: 'pending'
     },
     source_code:{
         type: DataTypes.STRING,
         allowNull: false,      
     }
+  }, {
+    timestamps: true
   });
 Submission.sync()
 module.exports = Submission;

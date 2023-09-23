@@ -35,7 +35,9 @@ def evaluate(body):
         image, _ = client.images.build(path=body['id'], tag=body['id'])
         container = client.containers.run(body['id'], volumes=[f"{os.getcwd()}/{body['id']}/outputs:/app/outputs"], remove=True)
         # compare outputs
+        count_wa = 0
         for idx, output in enumerate(outputs):
+            
             fn = output[0]
             result = ''
             with open(os.path.join(body['id'], 'outputs', f'{fn}.txt'), 'r') as f:
@@ -45,6 +47,11 @@ def evaluate(body):
                     db.update_test_result(submission_id, testcase_id=fn, user_output=result, verdict=Verdict.ACCEPTED, code_time=0, code_size=0)
                 else:
                     db.update_test_result(submission_id, testcase_id=fn, user_output=result, verdict=Verdict.WRONG_ANSWER, code_time=0, code_size=0)
+                    count_wa += 1
+        if count_wa == 0:
+            db.update_submission(submission_id, status='accepted')
+        else: 
+            db.update_submission(submission_id, status='wrong answer')
     # build error ~ [complile error]
     except docker.errors.BuildError as e:
         output = ''
@@ -63,6 +70,7 @@ def evaluate(body):
                 user_output += line
         for idx, input in enumerate(inputs):
             db.update_test_result(submission_id, testcase_id=input[0], user_output=user_output, verdict=Verdict.COMPILE_ERROR, code_time=0, code_size=0)
+        db.update_submission(submission_id, status='compile error')
     except docker.errors.APIError as e:
         print(e)
         for idx, input in enumerate(inputs):

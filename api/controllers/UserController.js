@@ -1,4 +1,4 @@
-const User = require('../models/User')
+const User = require('../schemas/User')
 controller = {
     get_user: async (req, res)=>{
         const id = req.params.id

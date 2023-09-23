@@ -1,4 +1,21 @@
 api/node_modules
 ds/node_modules
 ui/node_modules
+auth/node_modules
+node_modules/
+kafka/
 .vscode
+# es
+es/__pycache__
+# api-gateway
+api-gateway/.idea
+api-gateway/.mvn
+api-gateway/target
+api-gateway/src/main/**/target/
+api-gateway/src/test/**/target/
+# eureka_server
+eureka_server/.idea
+eureka_server/.mvn
+eureka_server/target
+eureka_server/src/main/**/target/
+eureka_server/src/test/**/target/
