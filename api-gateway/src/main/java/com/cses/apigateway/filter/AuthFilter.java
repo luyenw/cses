@@ -33,7 +33,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
             }else {
                 String access_token = exchange.getRequest().getCookies().get("access_token").get(0).toString();
                 System.out.println(access_token.substring(13));
-
+                // access_token=(...)
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + access_token.substring(13));
                 HttpEntity<String> entity = new HttpEntity<String>("parameters", httpHeaders);
