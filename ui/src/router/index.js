@@ -5,6 +5,9 @@ import LoginPage from '@/components/pages/LoginPage'
 import SignupPage from '@/components/pages/SignupPage'
 import NotFound from '@/components/pages/NotFound'
 import ProfilePage from '@/components/pages/ProfilePage'
+import LMSPage from '@/components/pages/LMSPage'
+import CourseViewPage from '@/components/pages/CourseViewPage'
+
 const routes = [
     {
         path: '/',
@@ -26,6 +29,14 @@ const routes = [
     {
         path: '/user/:id',
         component: ProfilePage
+    },
+    {
+        path: '/course/:id',
+        component: CourseViewPage
+    },
+    {
+        path: '/lms',
+        component: LMSPage
     },
     {
         path: '/:pathMatch(.*)*',

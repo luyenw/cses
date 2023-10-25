@@ -15,7 +15,8 @@ controller = {
         token.split(" ")[1],
         process.env.ACCESS_SECRET_TOKEN
       );
-      return res.sendStatus(2000);
+      const {password, ...rest} = decoded
+      return res.status(200).send(rest);
     } catch (e) {
       return res.status(403).json({ msg: e });
     }
@@ -26,7 +27,6 @@ controller = {
       const validatedDate = Validation.validateRegister(inp);
       const user = await User.findOne({ where: { username: inp.username } });
       if (user) {
-        console.log(user);
         res.status(422).json({ msg: "username is exist" });
         return;
       }
@@ -51,12 +51,10 @@ controller = {
       res.redirect(oauth.request_get_auth_code_url);
     } catch (error) {
       res.sendStatus(500);
-      console.log(error.message);
     }
   },
   oauth_callback: async (req, res) => {
     const authorization_token = req.query.code;
-    console.log(authorization_token);
     try {
       // ! get access token using authorization token
       var response = await oauth.get_access_token(authorization_token);
@@ -65,7 +63,6 @@ controller = {
       const query = `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`;
       response = await axios.get(query);
       const data = await response.data;
-      console.log(data);
       return res
         .setHeader("set-cookie", `access_token=${access_token}`)
         .sendStatus(200);
@@ -88,7 +85,7 @@ controller = {
         .json({ msg: "username or password is not correct" });
     }
     const accessToken = jwt.sign(
-      { username: inp.username, password: user.password },
+      { username: user.username, password: user.password, id: user.id },
       process.env.ACCESS_SECRET_TOKEN
     );
     return res
@@ -97,11 +94,13 @@ controller = {
       .send({ token: accessToken, user: user });
   },
   globalData: async (req, res) => {
-    console.log(res.locals.username);
     const user = await User.findOne({
       where: { username: res.locals.username },
     });
     return res.status(200).json(user);
+  },
+  get_login: (req, res) => {
+    return res.status(200).send("get login");
   },
 };
 module.exports = controller;

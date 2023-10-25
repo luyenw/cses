@@ -39,7 +39,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                 HttpEntity<String> entity = new HttpEntity<String>("parameters", httpHeaders);
                 RestTemplate restTemplate = new RestTemplate();
                 try {
-                    ResponseEntity<String> response = restTemplate.exchange("lb://AUTH-SERVICE", HttpMethod.POST, entity, String.class);
+                    ResponseEntity<String> response = restTemplate.exchange("http://localhost:3004/verify", HttpMethod.POST, entity, String.class);
                     System.out.println(response);
                     return chain.filter(exchange);
                 }catch(HttpClientErrorException e){

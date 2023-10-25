@@ -69,10 +69,11 @@ export default {
     async api_login(e) {
       e.preventDefault();
       try {
-        const resposne = await axios.post("http://localhost:3001/login", {
+        const response = await axios.post("http://localhost:3004/login", {
           username: this.username,
           password: this.password,
         });
+        console.log(response)
         const globalData = await axios.get("http://localhost:3001/globalData");
         this.$store.commit("setUser", globalData.data);
         this.$router.push({ path: '/', replace: true })

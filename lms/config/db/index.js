@@ -7,7 +7,7 @@ const connect = async () =>{
     });
     
     // Run create database statement
-    connection.query(`CREATE DATABASE IF NOT EXISTS cses`, (err, result)=>{
+    connection.query(`CREATE DATABASE IF NOT EXISTS lms`, (err, result)=>{
         if(err){
 
         }
@@ -18,7 +18,7 @@ const connect = async () =>{
             'Luyendkdk1',
             {
                 host: '127.0.0.1',
-                dialect: 'mysql',
+                dialect: 'mysql'
             }
         );
         sequelize.authenticate().then(() => {

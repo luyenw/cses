@@ -2,7 +2,7 @@
     <div v-if="!isLoggedIn">
     Login to see your submissions.
     </div>
-    <div v-else>
+    <div v-else class="px-4">
         <SubmissionTable :data="submissions"/>
     </div>
 </template>

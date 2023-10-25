@@ -1,5 +1,7 @@
 <template>
+  <div class="p-4">
   <Table :data="tasks"></Table>
+</div>
 </template>
 <script>
 import Table from "@/components/Table.vue";

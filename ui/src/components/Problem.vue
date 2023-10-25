@@ -100,26 +100,29 @@ export default {
     async submit(e) {
       e.preventDefault();
       try {
+        var source_code = monaco.editor.getModels()[0].getValue();
+        if (source_code.trim() == "") {
+          toast.error("Source code should not be empty\nSubmit failed!", {
+            autoClose: 5000,
+          });
+          return;
+        }
         const body = {
           task_id: Number(this.id),
           user_id: Number(this.user.id),
           lang: document.getElementById("languageSelect").value,
-          source_code: monaco.editor.getModels()[0].getValue(),
+          source_code: source_code,
         };
-        console.log(body);
         const response = await axios.post(
           "http://localhost:3001/submit/",
           body
         );
         toast.success("Submit sucessfully!", {
           autoClose: 3000,
-        }); // ToastOptions
+        });
         console.log(response);
       } catch (err) {
         console.log(err);
-        toast.success("Submit sucessfully!", {
-          autoClose: 3000,
-        });
       }
     },
     handleValueUpdate: (value) => {

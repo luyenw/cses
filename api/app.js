@@ -11,6 +11,7 @@ const eurekaHelper = require('./config/eureka/index');
 const RabbitMQ = require("./rabbitmq/index");
 const mq = RabbitMQ.getInstance();
 mq.createExchange("submissions", "fanout");
+mq.createQueue("task_queue")
 // middlewares
 //https://stackoverflow.com/questions/51224668/axios-cross-domain-cookies
 const cors = require("cors");
@@ -59,7 +60,7 @@ app.use(
   })
 );
 //
-eurekaHelper.registerWithEureka('SUBMISSION-SERVICE', 3001)
+// eurekaHelper.registerWithEureka('SUBMISSION-SERVICE', 3001)
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });

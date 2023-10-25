@@ -13,9 +13,13 @@ api-gateway/.mvn
 api-gateway/target
 api-gateway/src/main/**/target/
 api-gateway/src/test/**/target/
+api-gateway/mvnw
+api-gateway/mvnw.cmd
 # eureka_server
 eureka_server/.idea
 eureka_server/.mvn
 eureka_server/target
 eureka_server/src/main/**/target/
 eureka_server/src/test/**/target/
+eureka_server/mvnw
+eureka_server/mvnw.cmd

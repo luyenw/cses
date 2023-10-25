@@ -84,14 +84,17 @@ def callback(ch, method, properties, body):
     print(f" [RECEIVED] {body['id']} - {body['createdAt']}")
     thread = Thread(target=evaluate, args=(body, ))
     thread.start()
+    ch.basic_ack(delivery_tag=method.delivery_tag)
     print(f" [waiting for next msg..]")
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
-result = channel.queue_declare(queue='', exclusive=True)
-queue_name = result.method.queue
-channel.queue_bind(exchange='submissions', queue=queue_name)
+result = channel.queue_declare(queue='task_queue', durable=True)
+# queue_name = result.method.queue
+# print(queue_name)
+# channel.queue_bind(exchange='submissions', queue=queue_name)
+channel.basic_qos(prefetch_count=1)
 print(' [*] Waiting for logs. To exit press CTRL+C')
 channel.basic_consume(
-    queue=queue_name, on_message_callback=callback, auto_ack=True)
+    queue='task_queue', on_message_callback=callback)
 channel.start_consuming()

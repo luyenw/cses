@@ -1,8 +1,8 @@
 <template>
   <section class="bg-blueGray-50">
-    <div class="w-full px-4 mx-auto">
+    <div class="w-full px-4 mx-auto mt-4">
       <div
-        class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg mt-16"
+        class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg"
       >
         <div class="">
           <div class="flex flex-wrap justify-center">

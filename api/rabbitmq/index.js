@@ -22,14 +22,27 @@ class RabbitMQ {
       }, 500);
     });
   }
-  send(exchange, msg) {
+  createQueue(name){
+    amqp.connect("amqp://localhost", (err0, connection) => {
+      if (err0) console.log(err0);
+      else
+        connection.createChannel((err1, channel) => {
+          if (err1) console.log(err1);
+          else channel.assertQueue(name, {durable: true});
+        });
+      setTimeout(() => {
+        connection.close();
+      }, 500);
+    });
+  }
+  send(queue, msg) {
     amqp.connect("amqp://localhost", (err0, connection) => {
       if (err0) console.log(err0);
       else
         connection.createChannel((err1, channel) => {
           if (err1) console.log(err1);
           else {
-            channel.publish(exchange, "", Buffer.from(msg));
+            channel.sendToQueue(queue, Buffer.from(msg), {persistent: true});
             console.log(" [x] send %s", msg);
           }
         });

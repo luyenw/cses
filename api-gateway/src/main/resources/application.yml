@@ -3,21 +3,35 @@ spring:
       name: API-GATEWAY
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:8080"
+            allowedHeaders: "*"
+            allowCredentials: true
+            allowedMethods:
+              - GET
+              - POST
       routes:
+        - id: globalData
+          uri: lb://SUBMISSION-SERVICE/globalData
+          predicates:
+            - Path=/globalData
         - id: auth
-          uri: lb://SUBMISSION-SERVICE
+          uri: lb://AUTH-SERVICE/login
           predicates:
             - Path=/login
+
         - id: root
           uri: lb://SUBMISSION-SERVICE
           predicates:
             - Path=/
+
         - id: task
           uri: lb://SUBMISSION-SERVICE
           predicates:
             - Path=/task/**
-          filters:
-            - name: AuthFilter
+
 
         - id: submit
           uri: lb://SUBMISSION-SERVICE
@@ -25,8 +39,16 @@ spring:
             - Path=/submit/**
           filters:
             - name: AuthFilter
+
+        - id: discussion
+          uri: lb://DISCUSSION-SERVICE
+          predicates:
+            - Path=/graphql
+          filters:
+            - name: AuthFilter
+
 server:
-  port: 3003
+  port: 3333
 eureka:
   client:
     serviceUrl:

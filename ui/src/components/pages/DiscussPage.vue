@@ -66,7 +66,7 @@ export default {
         "content-type": "application/json",
       };
       const graphqlQuery = {
-        query: `mutation{ createMessage(input: {topic_id: ${this.id}, author_id: 1, body: \"${this.input_comment}\" , parent_id: "0"}){id author{name, imgUrl} body createdAt}}`,
+        query: `mutation{ createMessage(input: {topic_id: ${this.id}, author_id: ${this.user.id}, body: \"${this.input_comment}\" , parent_id: "0"}){id author{name, imgUrl} body createdAt}}`,
       };
       console.log(graphqlQuery.query);
       try {

@@ -32,7 +32,7 @@ app.get('/', (req, res)=>{
     return res.json({'msg':'ok'})
 })
 //
-eurekaHelper.registerWithEureka('DISCUSSION-SERVICE', 3002)
+// eurekaHelper.registerWithEureka('DISCUSSION-SERVICE', 3002)
 app.listen(3002, ()=>{
     console.log('Server is running on port 3002')
 })
