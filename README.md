@@ -15,10 +15,6 @@ graph LR;
     submission-service--message queue-->evaluation-system
     discussion-service<-->DB2[DB]
 
-    submission-service---->KAFKA;
-    discussion-service---->KAFKA;
-    notification-service---->KAFKA;
-
 
 
 ```
