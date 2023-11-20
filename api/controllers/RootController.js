@@ -43,7 +43,6 @@ module.exports=()=>{
     }
     controller.post_login= async (req, res)=>{
         inp = req.body
-        console.log(inp)
         const user = await User.findOne({where: {username: inp.username}})
         if (!user){
             return res.status(422).json({'msg': 'username or password is not correct'})
@@ -52,14 +51,13 @@ module.exports=()=>{
         if (compare_password == false){
             return res.status(422).json({'msg': 'username or password is not correct'})
         }
-        const accessToken = jwt.sign({username: inp.username, password: user.password}, process.env.ACCESS_SECRET_TOKEN);
+        const accessToken = jwt.sign({id: user.id, username: inp.username, password: user.password}, process.env.ACCESS_SECRET_TOKEN);
         return res.setHeader(
             'set-cookie', `access_token=${accessToken}`
         ).status(200).send({token: accessToken, user: user});
         
     }
     controller.globalData=async(req,res)=>{
-        console.log(res.locals.username)
         const user = await User.findOne({where: {username: res.locals.username}})
         return res.status(200).json(user)
     }

@@ -6,6 +6,7 @@ import docker
 import db
 from docker.types import Mount
 from verdict import Verdict
+from verdict import Status
 
 def prepare(body, inputs):
     os.makedirs(body['id'])
@@ -49,9 +50,11 @@ def evaluate(body):
                     db.update_test_result(submission_id, testcase_id=fn, user_output=result, verdict=Verdict.WRONG_ANSWER, code_time=0, code_size=0)
                     count_wa += 1
         if count_wa == 0:
-            db.update_submission(submission_id, status='accepted')
+            # status = Accept
+            db.update_submission(submission_id, status=Status.ACCEPT)
         else: 
-            db.update_submission(submission_id, status='wrong answer')
+            # status = Partial
+            db.update_submission(submission_id, status=Status.PARTIAL)
     # build error ~ [complile error]
     except docker.errors.BuildError as e:
         output = ''
@@ -70,13 +73,15 @@ def evaluate(body):
                 user_output += line
         for idx, input in enumerate(inputs):
             db.update_test_result(submission_id, testcase_id=input[0], user_output=user_output, verdict=Verdict.COMPILE_ERROR, code_time=0, code_size=0)
-        db.update_submission(submission_id, status='compile error')
+        # status = compile error
+        db.update_submission(submission_id, status=Status.COMPILE_ERROR)
     except docker.errors.APIError as e:
         print(e)
         for idx, input in enumerate(inputs):
             db.update_test_result(submission_id, testcase_id=input[0], user_output=output, verdict=Verdict.REJECTED, code_time=0, code_size=0)
     # update db
     finally: 
+        # pass
         shutil.rmtree(body['id'])
 from threading import Thread
 def callback(ch, method, properties, body):

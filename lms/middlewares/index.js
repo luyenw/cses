@@ -10,9 +10,9 @@ const tokenAuthorize = async (req, res, next) =>{
         const config = {
             headers: { Authorization: `Bearer ${token}` }
         };
-        console.log(token) 
         const response = await axios.post('http://localhost:3004/verify', "", config)
         res.locals.user = response.data
+        console.log(response.data)
         next();
     } catch (e) {
         console.log(e)

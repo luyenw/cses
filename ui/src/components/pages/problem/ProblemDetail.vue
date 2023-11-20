@@ -25,7 +25,7 @@
       <div id="editor" class="w-1/2 h-64"></div>
       <button
         type="submit"
-        class="cursor-pointer my-2 inline-block rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-sm text-sm px-5 py-2.5 focus:outline-none"
         :disabled="user ? false : true"
       >
         {{ user ? "Submit" : "Login required for submit" }}
@@ -38,7 +38,7 @@ import loader from "@monaco-editor/loader";
 import axios from "axios";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { mapGetters } from "vuex";
-import Badge from "./Badge.vue";
+import Badge from "@/components/Badge.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 const setup = (props) => {
@@ -56,7 +56,7 @@ const setup = (props) => {
       const editorOptions = {
         language: "cpp",
         minimap: { enabled: false },
-        theme: "vs-dark",
+        theme: "vs-light",
       };
       const editor = monaco.editor.create(
         document.getElementById("editor"),

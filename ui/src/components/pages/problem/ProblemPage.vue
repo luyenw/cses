@@ -1,17 +1,17 @@
 <template>
   <Tab :itemsList="itemsList" :active="0">
-    <template v-slot:tabPanel-1><Problem :id="Number(id)" /></template>
+    <template v-slot:tabPanel-1><ProblemDetail :id="Number(id)" /></template>
     <template v-slot:tabPanel-2><ResultPage :id="Number(id)" /></template>
     <template v-slot:tabPanel-3> Content 3 </template>
-    <template v-slot:tabPanel-4><DiscussPage :id="Number(id)" /> </template>
+    <template v-slot:tabPanel-4><ProblemDiscuss :id="Number(id)" /> </template>
   </Tab>
 </template>
 <script>
 import { useRoute } from "vue-router";
 import Tab from "@/components/Tab.vue";
-import Problem from "@/components/Problem.vue";
-import ResultPage from "./ResultPage.vue";
-import DiscussPage from "./DiscussPage.vue";
+import ResultPage from "./ProblemResult.vue";
+import ProblemDetail from "./ProblemDetail.vue";
+import ProblemDiscuss from "./ProblemDiscuss.vue";
 const setup = () => {
   const itemsList = ["Problem", "Result", "Statistics", "Discuss"];
   const route = useRoute();
@@ -19,8 +19,8 @@ const setup = () => {
   return { id, itemsList };
 };
 export default {
-  name: "ProblemDetail",
+  name: "ProblemPage",
   setup,
-  components: { Tab, Problem, ResultPage, DiscussPage },
+  components: { Tab, ResultPage, ProblemDiscuss, ProblemDetail, ProblemDiscuss },
 };
 </script>

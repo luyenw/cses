@@ -1,10 +1,15 @@
 const router = require('express').Router()
 const controller = require('../controllers/ClassController')
 const tokenAuthorize = require('../middlewares')
+router.post('/:id/modules', tokenAuthorize, controller.new_module)
+router.post('/:id/modules/:module_id/items', tokenAuthorize, controller.add_item)
+router.get('/:id/modules/:module_id/items', tokenAuthorize, controller.get_items)
+router.get('/:id/page/:page_id', tokenAuthorize, controller.get_page)
+router.get('/:id/pages', tokenAuthorize, controller.get_pages)
+router.post('/:id/pages', tokenAuthorize, controller.new_page)
 router.get('/:id/ps', tokenAuthorize, controller.get_ps)
 router.post('/:id/ps', tokenAuthorize, controller.new_ps)
 router.get('/:id', tokenAuthorize, controller.get_by_id)
 router.post('/', tokenAuthorize, controller.new_class)
 router.get('/', tokenAuthorize, controller.get_root)
-
 module.exports = router

@@ -28,8 +28,8 @@ const Submission = sequelize.define('submissions', {
       allowNull: false,
     },
     status:{
-      type: DataTypes.STRING,
-      defaultValue: 'pending'
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     },
     source_code:{
         type: DataTypes.STRING,

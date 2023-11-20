@@ -1,7 +1,7 @@
 <template>
     <router-link :to="'/course/'+data.id">
 <article
-  class=" lg:aspect-square hover:bg-gray-100 border border-gray-200 rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6 hover:cursor-pointer"
+  class=" lg:aspect-square hover:bg-gray-100 border border-gray-200 rounded-sm bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6 hover:cursor-pointer"
 >
   <span class="inline-block rounded bg-blue-600 p-2 text-white">
     <svg

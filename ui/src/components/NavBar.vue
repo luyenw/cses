@@ -70,7 +70,6 @@
 </template>
 <script>
 import axios from "axios";
-import { initFlowbite } from "flowbite";
 import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { mapGetters, useStore } from "vuex";
@@ -89,7 +88,6 @@ export default {
       } catch (err) {
         console.log(err + "tainavbar");
       }
-      initFlowbite();
     });
   },
   data() {

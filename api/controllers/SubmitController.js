@@ -78,5 +78,15 @@ module.exports = () => {
     //
     return res.json(submission);
   };
+  controller.view = async (req, res)=>{
+    const id = req.params.id
+    var submission = await Submission.findByPk(id)
+    var results = await Result.findAll({where: {submission_id: id}})
+    results = await Promise.all(results.map(async (x)=>{
+      x.dataValues.testcase = await TestCase.findByPk(x.testcase_id)
+      return x
+    }))
+    return res.json({source_code: submission.dataValues.source_code, results: results})
+  }
   return controller;
 };
