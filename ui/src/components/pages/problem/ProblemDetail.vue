@@ -6,6 +6,8 @@
       </h1>
       <Badge :label="task.difficulty" />
       <br />
+      <div class="text-sm">Time limit: {{ task.time_limit }}</div>
+      <div class="text-sm">Memory limit: {{ task.memory_limit }} KB</div>
       <span style="white-space: pre-line; overflow: hidden" class="">{{
         task.content
       }}</span>

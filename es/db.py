@@ -30,7 +30,7 @@ def get_inputs(task_id):
 def get_outputs(task_id):
     return execute_get('select id, output from test_cases where task_id = %s', (task_id,))
 
-
+# 
 def create_test_result(submission_id, testcase_id, user_output, verdict, code_time, code_size):
     cmd = 'insert into results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) values(%s, %s, %s, %s, %s, %s, %s, %s)'
     params =  (submission_id, testcase_id, user_output, verdict, code_time, code_size, datetime.utcnow(), datetime.utcnow(), )
@@ -39,7 +39,7 @@ def create_test_result(submission_id, testcase_id, user_output, verdict, code_ti
         print(' [v] saved Result')
     else:
         print(' [x] cannot create new Result')
-
+# 
 def update_test_result(submission_id, testcase_id, user_output, verdict, code_time, code_size):
     cmd = 'update results set user_output=%s, verdict=%s, code_time=%s, code_size=%s, updatedAt=%s where submission_id=%s and testcase_id=%s;'
     params = (user_output, verdict, code_time, code_size, datetime.utcnow(), submission_id, testcase_id, )
@@ -48,10 +48,10 @@ def update_test_result(submission_id, testcase_id, user_output, verdict, code_ti
         print(f' [v] updated Result with verdict {verdict}')
     else:
         print(' [x] cannot update Result')
-
-def update_submission(submission_id, status):
-    cmd = 'update submissions set status=%s, updatedAt=%s where id=%s;'
-    params = (status, datetime.utcnow(), submission_id)
+#
+def update_submission(submission_id, status, passed):
+    cmd = 'update submissions set status=%s, passed=%s, updatedAt=%s where id=%s;'
+    params = (status, passed, datetime.utcnow(), submission_id)
     results = execute_update(cmd, params)
     if results>0:
         print(f' [v] updated submission with status {status}')

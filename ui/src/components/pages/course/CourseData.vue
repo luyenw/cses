@@ -33,7 +33,6 @@
 <script>
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import Table from "@/components/Table.vue";
 export default {
   name: "CourseData",
   setup(props) {
@@ -76,9 +75,6 @@ export default {
       type: Number,
       required: true,
     },
-  },
-  components: {
-    Table,
   },
 };
 </script>

@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const User = require('./User');
 const sequelize = new Sequelize(
     'cses',
     'root',
@@ -31,12 +32,24 @@ const Submission = sequelize.define('submissions', {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
+    passed:{
+      type: DataTypes.STRING,
+      defaultValue: 0
+    },
     source_code:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,      
     }
   }, {
-    timestamps: true
-  });
-Submission.sync()
+    timestamps: true,
+      classMethods: {
+      }
+    });
+
+Submission.belongsTo(User, {foreignKey: 'user_id'})
+
+// User.hasMany(Submission, {
+//   foreignKey: 'user_id' // The foreign key in the Submission table referencing the User table
+// });
+    Submission.sync()
 module.exports = Submission;

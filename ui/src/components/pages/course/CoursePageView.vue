@@ -141,7 +141,9 @@ export default {
           `http://localhost:3005/class/${id}/page/${page_id}`
         );
         data.value = response.data;
-      } catch (err) {}
+      } catch (err) {
+        console.log(err)
+      }
     });
     return {
       id,

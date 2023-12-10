@@ -2,7 +2,7 @@
   <div class="flex flex-row-reverse px-4 py-2">
     <button
       id="createButton"
-      class="bg-white hover:bg-gray-100 text-sm font-semibold py-1 px-4 border border-gray-300 rounded shadow-sm transition hover:shadow-md"
+      class="bg-white hover:bg-gray-100 text-sm font-semibold py-1 px-4 border border-gray-300 rounded shadow-sm transition hover:shadow-sm"
     >
       Join or create a team
     </button>

@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-row h-[calc(100vh-74px)]">
     <aside id="sidebar-multi-level-sidebar" class="top-0 left-0 z-40 w-64">
-      <div class="px-3 py-4 bg-gray-50">
+      <div class="px-3 bg-gray-50">
         <router-link to="/lms">
           <button
-            class="flex items-center text-base hover:underline font-medium"
+            class="flex items-center text-base hover:text-blue-600 font-medium py-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +20,7 @@
                 d="M15.75 19.5L8.25 12l7.5-7.5"
               />
             </svg>
-            <p class="px-4">Back</p>
+            <p class="">Back</p>
           </button>
         </router-link>
         <ul class="space-y-2 font-medium">
@@ -128,7 +128,6 @@ import CourseContent from "./course/CourseContent.vue";
 import CourseMaterials from "./course/CourseMaterials.vue";
 import CoursePages from "./course/CoursePages.vue";
 import CourseData from "./course/CourseData.vue";
-import CoursePageView from "./course/CoursePageView.vue";
 export default {
   name: "CourseMain",
   setup() {
@@ -155,6 +154,6 @@ export default {
       active_index: 0
     }
   },
-  components: { RouterLink, Tab, CourseContent, CourseMaterials, CoursePages, CourseData, CoursePageView },
+  components: { RouterLink, Tab, CourseContent, CourseMaterials, CoursePages, CourseData },
 };
 </script>

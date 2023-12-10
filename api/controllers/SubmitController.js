@@ -9,44 +9,45 @@ const TestCase = require("../schemas/Testcase");
 
 var controller = {};
 module.exports = () => {
-  controller.get_result = async (req, res) => {
-    const { submission_id, id } = req.params;
-    try {
-      const submission = await Submission.findByPk(submission_id);
-      const testcases = await TestCase.findAll({ where: { task_id: id } });
-      const resultsPromises = testcases.map(async (x) => {
-        const result = await Result.findOne({
-          where: {
-            submission_id,
-            testcase_id: x.id,
-          },
-        });
-        return { input: x.input, output: x.output, ...result.dataValues };
-      });
-      const results = await Promise.all(resultsPromises);
-      return res.status(200).send({
-        source_code: submission.source_code,
-        results
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).send({ error: "Internal Server Error" });
-    }
-  };
-  controller.get = async (req, res) => {
-    const task_id = req.params.id;
+  // controller.get_submission_details = async (req, res) => {
+  //   const { submission_id, id } = req.params;
+  //   try {
+  //     const submission = await Submission.findByPk(submission_id);
+  //     const testcases = await TestCase.findAll({ where: { task_id: id } });
+  //     const resultsPromises = testcases.map(async (x) => {
+  //       const result = await Result.findOne({
+  //         where: {
+  //           submission_id,
+  //           testcase_id: x.id,
+  //         },
+  //       });
+  //       return { input: x.input, output: x.output, ...result.dataValues };
+  //     });
+  //     const results = await Promise.all(resultsPromises);
+  //     return res.status(200).send({
+  //       source_code: submission.source_code,
+  //       results
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).send({ error: "Internal Server Error" });
+  //   }
+  // };
+  controller.get_submissions_by_user_id = async (req, res) => {
+    const problem_id = req.params.problem_id;
     const user = await User.findOne({
       where: { username: res.locals.username },
     });
     const user_id = await user.dataValues.id;
     const submissions = await Submission.findAll({
-      where: { task_id: task_id, user_id: user_id },
+      where: { task_id: problem_id, user_id: user_id },
     });
     return res.json(submissions);
   };
-  controller.post = async (req, res) => {
+  controller.post_new_submission = async (req, res) => {
     inp = req.body;
     uploader = res.locals.username;
+    // validate input
     try {
       const validatedData = Validation.validateSubmission(inp);
     } catch (error) {
@@ -78,8 +79,8 @@ module.exports = () => {
     //
     return res.json(submission);
   };
-  controller.view = async (req, res)=>{
-    const id = req.params.id
+  controller.get_submission_details = async (req, res)=>{
+    const id = req.params.submission_id
     var submission = await Submission.findByPk(id)
     var results = await Result.findAll({where: {submission_id: id}})
     results = await Promise.all(results.map(async (x)=>{
@@ -87,6 +88,11 @@ module.exports = () => {
       return x
     }))
     return res.json({source_code: submission.dataValues.source_code, results: results})
+  }
+  controller.get_submissions_by_problem_id = async (req, res)=>{
+    const problem_id = req.params.problem_id
+    var submissions = await Submission.findAll({ include: [{ model: User }]});
+    return res.status(200).json(submissions)
   }
   return controller;
 };

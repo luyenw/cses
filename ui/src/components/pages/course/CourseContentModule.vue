@@ -72,11 +72,14 @@ export default {
       this.isOpen = !this.isOpen;
       if (this.items.length == 0) {
         try {
+          console.log(`http://localhost:3005/class/${this.course_id}/modules/${this.id}/items`)
           const response = await axios.get(
             `http://localhost:3005/class/${this.course_id}/modules/${this.id}/items`
           );
           this.items = response.data;
-        } catch (err) {}
+        } catch (err) {
+          console.log(err)
+        }
       }
     },
   },

@@ -12,6 +12,7 @@ def prepare(body, inputs):
     os.makedirs(body['id'])
     with open(os.path.join(body['id'], 'main.cpp'), 'w') as f:
         f.write(body['source_code'])
+    #
     shutil.copy('Dockerfile', os.path.join(body['id'], 'Dockerfile'))
     shutil.copy('run.sh', os.path.join(body['id'], 'run.sh'))
     os.makedirs(os.path.join(body['id'], 'inputs'))
@@ -26,11 +27,13 @@ def prepare(body, inputs):
         db.create_test_result(submission_id, testcase_id, '', verdict=0, code_time=0, code_size=0)
 
 def evaluate(body):
+    number_of_passes = 0
     inputs = db.get_inputs(body['task_id'])
     outputs = db.get_outputs(body['task_id'])
     submission_id = body['id']
     sorted(outputs)
     prepare(body, inputs=inputs)
+    #
     client = docker.from_env()
     try:
         image, _ = client.images.build(path=body['id'], tag=body['id'])
@@ -38,23 +41,23 @@ def evaluate(body):
         # compare outputs
         count_wa = 0
         for idx, output in enumerate(outputs):
-            
             fn = output[0]
             result = ''
             with open(os.path.join(body['id'], 'outputs', f'{fn}.txt'), 'r') as f:
                 result=f.readlines()
                 result=''.join(result)
                 if result == output[1]:
+                    number_of_passes += 1
                     db.update_test_result(submission_id, testcase_id=fn, user_output=result, verdict=Verdict.ACCEPTED, code_time=0, code_size=0)
                 else:
                     db.update_test_result(submission_id, testcase_id=fn, user_output=result, verdict=Verdict.WRONG_ANSWER, code_time=0, code_size=0)
                     count_wa += 1
         if count_wa == 0:
             # status = Accept
-            db.update_submission(submission_id, status=Status.ACCEPT)
+            db.update_submission(submission_id, status=Status.ACCEPT, passed=f'{number_of_passes}/{len(outputs)}')
         else: 
             # status = Partial
-            db.update_submission(submission_id, status=Status.PARTIAL)
+            db.update_submission(submission_id, status=Status.PARTIAL, passed=f'{number_of_passes}/{len(outputs)}')
     # build error ~ [complile error]
     except docker.errors.BuildError as e:
         output = ''
@@ -74,7 +77,7 @@ def evaluate(body):
         for idx, input in enumerate(inputs):
             db.update_test_result(submission_id, testcase_id=input[0], user_output=user_output, verdict=Verdict.COMPILE_ERROR, code_time=0, code_size=0)
         # status = compile error
-        db.update_submission(submission_id, status=Status.COMPILE_ERROR)
+        db.update_submission(submission_id, status=Status.COMPILE_ERROR, passed=f'0/{len(outputs)}')
     except docker.errors.APIError as e:
         print(e)
         for idx, input in enumerate(inputs):
@@ -95,9 +98,6 @@ def callback(ch, method, properties, body):
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
 result = channel.queue_declare(queue='task_queue', durable=True)
-# queue_name = result.method.queue
-# print(queue_name)
-# channel.queue_bind(exchange='submissions', queue=queue_name)
 channel.basic_qos(prefetch_count=1)
 print(' [*] Waiting for logs. To exit press CTRL+C')
 channel.basic_consume(
