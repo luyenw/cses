@@ -4,7 +4,7 @@ module.exports = {
   configureWebpack: {
     plugins: [
       new MonacoWebpackPlugin({
-        languages: ["python", "cpp"],//configure your languages here
+        languages: ["python", "cpp"], //configure your languages here
         features: ["coreCommands", "find"],
       }), // Place it here
     ],

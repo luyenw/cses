@@ -1,6 +1,8 @@
 <template>
   <div class="p-4">
-    <ProblemTable :data="problems"></ProblemTable>
+    <div class="sm:w-full lg:w-2/3 md:w-2/3">
+      <ProblemTable :data="problems"></ProblemTable>
+    </div>
   </div>
 </template>
 <script>
@@ -13,7 +15,8 @@ export default {
     const problems = ref([]);
     onMounted(async () => {
       try {
-        const response = await axios.get("http://localhost:3001/");
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const response = await axios.get(`${apiUrl}:3001/`);
         problems.value = response.data;
       } catch (err) {
         console.log(err);

@@ -137,7 +137,8 @@ export default {
     const data = ref({});
     onMounted(async () => {
       try {
-        const response = await axios.get(`http://localhost:3005/class/${id}`);
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const response = await axios.get(`${apiUrl}:3005/class/${id}`);
         data.value = await response.data;
       } catch (err) {
         console.log(err);

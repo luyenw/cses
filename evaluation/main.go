@@ -3,15 +3,14 @@ package main
 import (
 	"bufio"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"sync/atomic"
+	"fmt"
 	"time"
+	"sync"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 
@@ -19,17 +18,19 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
-	"github.com/go-sql-driver/mysql"
+
+	"evaluation/config"
 )
 
-var db *sql.DB
 var ctx context.Context
 var cli *client.Client
+var mu  sync.Mutex
 
 type SubmissionJson struct {
 	Id        string `json:"id"`
 	Source    string `json:"source_code"`
-	ProblemId int    `json:"task_id"`
+	ProblemId int    `json:"problem_id"`
+	ContestId int    `json:"contest_id"`
 }
 type ErrorLine struct {
 	Error       string      `json:"error"`
@@ -47,8 +48,9 @@ type Input struct {
 }
 
 type Submission struct {
+	contestId    int
 	submissionId string
-	taskId       int
+	problemId    int
 	userId       int
 	lang         string
 	status       int
@@ -84,13 +86,12 @@ const (
 )
 
 func testcasesByProblemId(problemId int64) ([]Input, error) {
-	var inputs []Input
-	rows, err := db.Query("select id, input, output from test_cases where task_id = ?", problemId)
-	if err != nil {
-		return nil, fmt.Errorf("testcasesByProblemId %q: %v", problemId, err)
+	rows, err := config.GetDB().Query("select id, input, output from test_cases where problem_id = ?", problemId)
+	if(err!=nil){
+		return nil, errors.New("cannot get testcases")
 	}
-	defer rows.Close()
 	// Loop through rows, using Scan to assign column data to struct fields.
+	var inputs []Input
 	for rows.Next() {
 		var alb Input
 		if err := rows.Scan(&alb.id, &alb.input, &alb.output); err != nil {
@@ -103,17 +104,23 @@ func testcasesByProblemId(problemId int64) ([]Input, error) {
 	}
 	return inputs, nil
 }
-func createTestResult(testResult TestResult) (int64, error) {
-	result, err := db.Exec("insert into results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) values(?, ?, ?, ?, ?, ?, ?, ?)",
+func createTestResult(testResult TestResult) error {
+// 	var result TestResult
+// 	err := config.GetDB().QueryRow(`
+//     INSERT INTO results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) 
+//     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+//     RETURN submission_id, testcase_id, user_output, verdict, code_time, code_size
+// `	, testResult.submissionId, testResult.testcaseId, testResult.userOutput, testResult.verdict, testResult.codeTime, testResult.codeSize, time.Now(), time.Now()).Scan(
+//     &result.submissionId, &result.testcaseId, &result.userOutput, &result.verdict, &result.codeTime, &result.codeSize)
+
+	// Execute the SQL statement
+	_, err := config.GetDB().Exec("INSERT INTO results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 		testResult.submissionId, testResult.testcaseId, testResult.userOutput, testResult.verdict, testResult.codeTime, testResult.codeSize, time.Now(), time.Now())
-	if err != nil {
-		return 0, fmt.Errorf("createTestResult: %v", err)
-	}
-	id, err := result.RowsAffected()
-	return id, nil
+	return err
 }
+
 func updateTestResult(testResult TestResult) (int64, error) {
-	result, err := db.Exec("update results set user_output=?, verdict=?, code_time=?, code_size=?, updatedAt=? where submission_id=? and testcase_id=?",
+	result, err := config.GetDB().Exec("update results set user_output=?, verdict=?, code_time=?, code_size=?, updatedAt=? where submission_id=? and testcase_id=?",
 		testResult.userOutput, testResult.verdict, testResult.codeTime, testResult.codeSize, time.Now(), testResult.submissionId, testResult.testcaseId)
 	if err != nil {
 		return 0, fmt.Errorf("updateTestResult: %v", err)
@@ -125,7 +132,7 @@ func updateTestResult(testResult TestResult) (int64, error) {
 	return id, nil
 }
 func updateSubmission(submissionId string, status Status, passed string) (int64, error) {
-	result, err := db.Exec("update submissions set status=?, passed=?, updatedAt=? where id=?",
+	result, err := config.GetDB().Exec("update submissions set status=?, passed=?, updatedAt=? where id=?",
 		status, passed, time.Now(), submissionId)
 	if err != nil {
 		return 0, fmt.Errorf("updateSubmission: %v", err)
@@ -189,30 +196,24 @@ func copyFileContents(src, dst string) (err error) {
 }
 
 func prepair(body SubmissionJson, testcases []Input) {
-	err := os.MkdirAll(body.Id+"/inputs", 0750)
-	err = os.MkdirAll(body.Id+"/outputs", 0750)
-	err = os.MkdirAll(body.Id+"/user_outputs", 0750)
+	err := os.MkdirAll(body.Id+"/inputs", 0777)
+	err = os.MkdirAll(body.Id+"/outputs", 0777)
+	err = os.MkdirAll(body.Id+"/user_outputs", 0777)
 	failOnError(err, "Failed to make dirs")
-	err = os.WriteFile(body.Id+"/main.cpp", []byte(body.Source), 0660)
+	err = os.WriteFile(body.Id+"/main.cpp", []byte(body.Source), 0777)
 	failOnError(err, "Failed to write main.cpp")
 	err = CopyFile("Dockerfile", body.Id+"/Dockerfile")
 	failOnError(err, "Failed to write Dockerfile")
 	err = CopyFile("run.sh", body.Id+"/run.sh")
 	failOnError(err, "Failed to write run.sh")
 
-	// var wg sync.WaitGroup
 	for _, testcase := range testcases {
-		// wg.Add(1)
-		// go func(testcase Input) {
-		// defer wg.Done()
-		err = os.WriteFile(body.Id+"/inputs/"+testcase.id+".txt", []byte(testcase.input), 0660)
-		err = os.WriteFile(body.Id+"/outputs/"+testcase.id+".txt", []byte(testcase.output), 0660)
+		err = os.WriteFile(body.Id+"/inputs/"+testcase.id+".txt", []byte(testcase.input), 0777)
+		err = os.WriteFile(body.Id+"/outputs/"+testcase.id+".txt", []byte(testcase.output), 0777)
 		failOnError(err, "Failed to write testcase")
-		_, err = createTestResult(TestResult{body.Id, testcase.id, "", 0, 0, 0})
-		failOnError(err, "Failed to insert new test result")
-		// }(testcase)
+		err = createTestResult(TestResult{body.Id, testcase.id, "", 0, 0, 0})
+		// failOnError(err, "Failed to insert new test result"+err.Error())
 	}
-	// wg.Wait()
 }
 
 func failOnError(err error, msg string) {
@@ -288,10 +289,14 @@ func standardGrading(input string, output string) bool {
 }
 func evaluate(msg []byte, channel chan string) {
 	channel <- string(msg)
+	start := time.Now()
 	// convert msg to object
 	var submission SubmissionJson
 	err := json.Unmarshal(msg, &submission)
-	failOnError(err, "Cannot parse message.")
+	if err != nil {
+		log.Print("Cannot parse message." + err.Error())
+		return
+	}
 	//
 	inputs, err := testcasesByProblemId(int64(submission.ProblemId))
 	prepair(submission, inputs)
@@ -340,7 +345,7 @@ func evaluate(msg []byte, channel chan string) {
 				verdict = VERDICT_ACCEPTED
 			} else {
 				verdict = VERDICT_WRONG_ANSWER
-				atomic.AddInt32(&count_wa, 1)
+				count_wa += 1
 			}
 			updateTestResult(TestResult{
 				submission.Id,
@@ -357,7 +362,7 @@ func evaluate(msg []byte, channel chan string) {
 			updateSubmission(submission.Id, STATUS_PARTIAL, fmt.Sprintf("%d/%d", cap(inputs)-int(count_wa), cap(inputs)))
 		}
 	}
-	log.Printf("%s is done", submission.Id)
+	log.Printf("%s done after %s", submission.Id, time.Since(start))
 	<-channel
 }
 
@@ -369,22 +374,8 @@ func main() {
 		panic(err)
 	}
 	defer cli.Close()
-	// Capture connection properties.
-	cfg := mysql.Config{
-		User:   "root",
-		Passwd: "Luyendkdk1",
-		Net:    "tcp",
-		Addr:   "127.0.0.1:3306",
-		DBName: "cses",
-	}
-	// Get a database handle.
-	db, err = sql.Open("mysql", cfg.FormatDSN())
-	failOnError(err, "Failed to connect to MySQL")
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
-	}
-	fmt.Println("DB Connected")
+	
+	config.MySQLInit()
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")

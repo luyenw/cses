@@ -1,4 +1,5 @@
 const {DataTypes, Sequelize} = require('sequelize')
+const Submission = require('./Submission')
 const sequelize = new Sequelize(
     'cses',
     'root',
@@ -42,4 +43,5 @@ const Result = sequelize.define('results', {
         allowNull: false}
 })
 Result.sync()
+
 module.exports = Result

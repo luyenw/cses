@@ -1,6 +1,6 @@
 <template>
   <div
-    class="lg:w-2/3 md:w-full sm:w-full overflow-hidden rounded-lg border border-gray-200"
+    class="overflow-hidden rounded-lg border border-gray-200"
   >
     <table
       class="w-full table-auto border-collapse bg-white text-center text-sm text-gray-500"
@@ -11,38 +11,38 @@
           <th
             field="id"
             scope="col"
-            class="px-6 py-4 font-medium text-gray-900"
+            class="px-6 py-2 font-weight text-gray-900"
           >
             <button @click="onSort">ID</button>
           </th>
           <th
             field="lang"
             scope="col"
-            class="px-6 py-4 font-medium text-gray-900"
+            class="px-6 py-2 font-weight text-gray-900"
           >
             <button @click="onSort">Lang</button>
           </th>
-          <th scope="col" class="px-6 py-4 font-medium text-gray-900">
+          <th scope="col" class="px-6 py-2 font-weight text-gray-900">
             Execution time
           </th>
           <th
             field="status"
             scope="col"
-            class="px-6 py-4 font-medium text-gray-900"
+            class="px-6 py-2 font-weight text-gray-900"
           >
             <button @click="onSort">Status</button>
           </th>
           <th
             field="lang"
             scope="col"
-            class="px-6 py-4 font-medium text-gray-900"
+            class="px-6 py-2 font-weight text-gray-900"
           >
             <button @click="onSort">Passed</button>
           </th>
           <th
             field="createdAt"
             scope="col"
-            class="px-6 py-4 font-medium text-gray-900"
+            class="px-6 py-2 font-weight text-gray-900"
           >
             <button @click="onSort">Time</button>
           </th>
@@ -51,9 +51,9 @@
       <tbody class="divide-y divide-gray-100 border-t border-gray-100">
         <tr v-for="line in data" class="odd:bg-white even:bg-gray-50">
           <td class="text-center">
-            <router-link :to="'/submit/view/' + line.id">
+            <router-link :to="'/submit/' + line.id+'/view'">
               <span class="text-blue-500 underline hover:text-blue-700">{{
-                line.id.substring(0, 16)
+                line.id.substring(0, 8)
               }}</span>
             </router-link>
           </td>
@@ -93,7 +93,7 @@
 import constant from "@/enum/constant";
 import { ref } from "vue";
 export default {
-  name: "ProblemResultName",
+  name: "ProblemResultTable",
   setup(props) {
     var sortOrder = -1;
     const onSort = (e) => {

@@ -13,16 +13,20 @@ const sequelize = new Sequelize(
 );
 const Submission = sequelize.define('submissions', {
     id: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING,
       primaryKey: true,
     },
-    task_id: {
+    problem_id: {
         type: DataTypes.INTEGER,  
         allowNull: false,
     },
     user_id:{
         type: DataTypes.INTEGER,
         allowNull: false,
+    },
+    contest_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     lang: {
       type: DataTypes.ENUM('c', 'cpp', 'python'),
@@ -45,11 +49,9 @@ const Submission = sequelize.define('submissions', {
       classMethods: {
       }
     });
+Submission.sync()
 
-Submission.belongsTo(User, {foreignKey: 'user_id'})
+User.hasMany(Submission, {foreignKey: 'id'})
+Submission.belongsTo(User, {foreignKey: 'user_id', targetKey: 'id'})
 
-// User.hasMany(Submission, {
-//   foreignKey: 'user_id' // The foreign key in the Submission table referencing the User table
-// });
-    Submission.sync()
 module.exports = Submission;

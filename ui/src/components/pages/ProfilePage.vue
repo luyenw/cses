@@ -65,7 +65,8 @@ export default {
     const id = route.params.id;
     onMounted(async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/user/${id}`);
+        const apiUrl = process.env.API_URL
+        const response = await axios.get(`${apiUrl}:3001/users/${id}`);
         user.value = await response.data;
         console.log(user.value);
       } catch (err) {}

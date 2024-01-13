@@ -1,28 +1,28 @@
 <template>
   <div
-    class="lg:w-2/3 md:w-full sm:w-full overflow-hidden rounded-lg border border-gray-200"
+    class="w-full overflow-hidden rounded-lg border border-gray-200"
   >
     <table class="table-auto w-full border-collapse bg-white text-left text-sm text-gray-500">
     <thead class="bg-gray-50">
       <tr class="flex">
-        <th field="status" scope="col" class="px-6 py-4 font-medium text-gray-900 w-1/6">
+        <th field="status" scope="col" class="px-6 py-2 font-weight text-gray-900 w-1/6">
           <button @click="onSort">Status</button>
         </th>
-        <th field="title" scope="col" class="px-6 py-4 font-medium text-gray-900 w-3/6">
+        <th field="title" scope="col" class="px-6 py-2 font-weight text-gray-900 w-3/6">
           <button @click="onSort">Title</button>
         </th>
-        <th field="difficulty" scope="col" class="px-6 py-4 font-medium text-gray-900 w-2/6">
+        <th field="difficulty" scope="col" class="px-6 py-2 font-weight text-gray-900 w-2/6">
           <button @click="onSort">Difficulty</button>
         </th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100 border-t border-gray-100">
-      <tr v-for="task in data" class="flex odd:bg-white even:bg-gray-50">
-        <td class="px-6 py-4 font-medium text-gray-700 w-1/6"></td>
-        <td class="px-6 py-4 text-gray-700 w-3/6">
-            <router-link :to="{path: `/task/${task.id}`}">{{ task.title }}</router-link>
+      <tr v-for="problem in data" class="flex odd:bg-white even:bg-gray-50">
+        <td class="px-6 py-2 font-weight text-gray-700 w-1/6"></td>
+        <td class="px-6 py-2 text-gray-700 w-3/6">
+            <router-link :to="{path: `/problems/${problem.id}`}">{{ problem.title }}</router-link>
         </td>
-        <td class="px-6 py-4 w-2/6">{{ task.difficulty }}</td>
+        <td class="px-6 py-2 w-2/6">{{ problem.difficulty }}</td>
       </tr>
     </tbody>
   </table>

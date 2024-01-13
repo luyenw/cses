@@ -1,9 +1,17 @@
 <template>
   <Tab :itemsList="itemsList" :active="0">
-    <template v-slot:tabPanel-1><ProblemDetail :id="Number(id)" /></template>
-    <template v-slot:tabPanel-2><ResultPage :id="Number(id)" /></template>
-    <template v-slot:tabPanel-3><ProblemStatistics :id="Number(id)"/> </template>
-    <template v-slot:tabPanel-4><ProblemDiscuss :id="Number(id)" /> </template>
+    <template v-slot:tabPanel-1
+      ><ProblemDetail :contest_id="0" :id="Number(id)"
+    /></template>
+    <template v-slot:tabPanel-2
+      ><ResultPage :contest_id="0" :id="Number(id)"
+    /></template>
+    <template v-slot:tabPanel-3
+      ><ProblemStatistics :contest_id="0" :id="Number(id)" />
+    </template>
+    <template v-slot:tabPanel-4
+      ><ProblemDiscuss :contest_id="0" :id="Number(id)" />
+    </template>
   </Tab>
 </template>
 <script>
@@ -22,6 +30,13 @@ const setup = () => {
 export default {
   name: "ProblemPage",
   setup,
-  components: { Tab, ResultPage, ProblemDiscuss, ProblemDetail, ProblemDiscuss, ProblemStatistics },
+  components: {
+    Tab,
+    ResultPage,
+    ProblemDiscuss,
+    ProblemDetail,
+    ProblemDiscuss,
+    ProblemStatistics,
+  },
 };
 </script>

@@ -1,8 +1,8 @@
 const Result = require('../schemas/Result')
 const Testcase = require('../schemas/Testcase')
 const resolvers ={
-    getTestcases: async({task_id})=>{
-        const testcases = await Testcase.findAll({where: {task_id: task_id}})
+    getTestcases: async({problem_id})=>{
+        const testcases = await Testcase.findAll({where: {problem_id: problem_id}})
         return testcases
     },
     updateResult: async({input})=>{

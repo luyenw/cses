@@ -18,7 +18,7 @@ var schema = buildSchema(`
     }
     type Testcase{
         id: String
-        task_id: Int
+        problem_id: Int
         input: String
         output: String
         createdAt: String
@@ -28,7 +28,7 @@ var schema = buildSchema(`
         updateResult(input: ResultInput): Result 
     }
     type Query {
-        getTestcases(task_id: Int): [Testcase] 
+        getTestcases(problem_id: Int): [Testcase] 
     }
 `)
 module.exports = schema

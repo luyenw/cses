@@ -3,8 +3,13 @@ ds/node_modules
 ui/node_modules
 auth/node_modules
 node_modules/
-kafka/
 .vscode
+# .env
+api/.env
+ds/.env
+ui/.env
+auth/.env
+lms/.env
 # es
 es/__pycache__
 # api-gateway

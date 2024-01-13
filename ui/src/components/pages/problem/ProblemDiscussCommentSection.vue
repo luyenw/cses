@@ -1,10 +1,12 @@
 <template>
     <div v-for="comment in data">
-        <DiscussCommentBase :data="comment"/>
+        <ProblemDiscussCommentBase :data="comment"/>
+        <!-- <DiscussCommentBase :data="comment"/> -->
     </div>
 </template>
 <script>
     import ProblemDiscussCommentBase from './ProblemDiscussCommentBase.vue';
+    import DiscussCommentBase from '@/components/DiscussCommentBase.vue';
     const setup=(props)=>{
         
     }
@@ -18,6 +20,6 @@
                 type: Array
             }
         },
-    components: { ProblemDiscussCommentBase }
+    components: { ProblemDiscussCommentBase, DiscussCommentBase }
 }
 </script>

@@ -14,7 +14,7 @@ var controller = {
     if (enrollment) {
       try {
         const response = await axios.get(
-          `http://localhost:3001/user/${req.body.username}`
+          `http://localhost:3001/users/${req.body.username}`
         );
         const user_id = response.data.id;
         await Enrollment.create({
@@ -37,7 +37,7 @@ var controller = {
       var ps = await Promise.all(
         ps_id.map(async (x) => {
           const response = await axios.get(
-            `http://localhost:3001/user/${x.dataValues.user_id}`
+            `http://localhost:3001/users/${x.dataValues.user_id}`
           );
           return { ...response.data, role: x.dataValues.role };
         })

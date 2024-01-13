@@ -27,10 +27,10 @@ spring:
           predicates:
             - Path=/
 
-        - id: task
+        - id: problem
           uri: lb://SUBMISSION-SERVICE
           predicates:
-            - Path=/task/**
+            - Path=/problems/**
 
 
         - id: submit

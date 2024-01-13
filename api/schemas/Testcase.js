@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const Problem = require('./Problem');
 const sequelize = new Sequelize(
     'cses',
     'root',
@@ -12,10 +13,10 @@ const sequelize = new Sequelize(
 );
 const TestCase = sequelize.define('test_cases', {
     id: {
-        type: DataTypes.STRING(30),
+        type: DataTypes.STRING,
         primaryKey: true,
     },
-    task_id: {
+    problem_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },

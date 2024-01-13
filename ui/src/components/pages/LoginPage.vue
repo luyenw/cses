@@ -69,17 +69,18 @@ export default {
     async api_login(e) {
       e.preventDefault();
       try {
-        const response = await axios.post("http://localhost:3004/login", {
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const response = await axios.post(`${apiUrl}:3004/login`, {
           username: this.username,
           password: this.password,
         });
         console.log(response)
-        const globalData = await axios.get("http://localhost:3001/globalData");
+        const globalData = await axios.get(`${apiUrl}:3001/globalData`);
         this.$store.commit("setUser", globalData.data);
         this.$router.push({ path: '/', replace: true })
       } catch (err) {
         this.error = true;
-        console.log(err);
+        console.log('login'+err);
       }
     },
   },

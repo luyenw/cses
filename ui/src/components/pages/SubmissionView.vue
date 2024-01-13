@@ -49,13 +49,16 @@ export default {
     const data = ref([]);
     onMounted(async () => {
       try {
+        const apiUrl = process.env.VUE_APP_API_URL;
         const response = await axios.get(
-          `http://localhost:3001/submit/view/${submission_id}`
+          `${apiUrl}:3001/submit/${submission_id}/details`
         );
         console.log(response.data);
         data.value = response.data;
         source_code.value = response.data.source_code;
-      } catch (err) {}
+      } catch (err) {
+        console.log(err)
+      }
       loader.init().then((monaco) => {
         const editorOptions = {
           language: "cpp",

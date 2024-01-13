@@ -38,7 +38,8 @@
           <p class="px-2">{{ showReplies ? "Hide" : "Show" }} Replies</p>
         </button>
 
-        <button v-if="user"
+        <button
+          v-if="user"
           type="button"
           @click="toggle_reply"
           class="flex items-center text-sm hover:underline dark:text-gray-400 font-medium"
@@ -63,28 +64,28 @@
     <div v-if="reply" class="border-l-4">
       <div class="ml-8">
         <form @submit="post_comment" class="">
-        <div
-          class="py-2 px-4 bg-white rounded-lg rounded-t-lg border border-gray-200"
-        >
-          <label for="comment" class="sr-only">Your comment</label>
-          <textarea
-            v-model="input_comment"
-            id="comment"
-            rows="6"
-            class="px-0 w-full text-sm text-black border-0 focus:ring-0 focus:outline-none placeholder-gray-500"
-            placeholder="Write a comment..."
-            required
-          ></textarea>
-        </div>
-        <div class="flex flex-row-reverse">
-          <button
-            type="submit"
-            class="mt-2 inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-sky-700 rounded-lg focus:ring-4 focus:ring-primary-200 focus:ring-primary-900 hover:bg-primary-800"
+          <div
+            class="py-2 px-4 bg-white rounded-lg rounded-t-lg border border-gray-200"
           >
-            Post comment
-          </button>
-        </div>
-      </form>
+            <label for="comment" class="sr-only">Your comment</label>
+            <textarea
+              v-model="input_comment"
+              id="comment"
+              rows="6"
+              class="px-0 w-full text-sm text-black border-0 focus:ring-0 focus:outline-none placeholder-gray-500"
+              placeholder="Write a comment..."
+              required
+            ></textarea>
+          </div>
+          <div class="flex flex-row-reverse">
+            <button
+              type="submit"
+              class="mt-2 inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-sky-700 rounded-lg focus:ring-4 focus:ring-primary-200 focus:ring-primary-900 hover:bg-primary-800"
+            >
+              Post comment
+            </button>
+          </div>
+        </form>
       </div>
     </div>
     <div v-if="showReplies" class="border-l-4">
@@ -104,15 +105,21 @@ const setup = (props) => {
   const replies = ref([]);
   TimeAgo.addDefaultLocale(en);
   onMounted(async () => {
-    const endpoint = "http://localhost:3002/graphql";
-    const headers = {
-      "content-type": "application/json",
-    };
-    const graphqlQuery = {
-      query: `query{ commentReplies(comment_id: \"${props.data.id}\"){author{name, imgUrl} id body createdAt}}`,
-    };
-    const response = await axios.post(endpoint, graphqlQuery, headers);
-    replies.value = await response.data.data.commentReplies;
+    try {
+      const apiUrl = process.env.VUE_APP_API_URL;
+      const endpoint = `${apiUrl}:3002/graphql`;
+      const headers = {
+        "content-type": "application/json",
+      };
+      const graphqlQuery = {
+        query: `query{ commentReplies(comment_id: \"${props.data.id}\"){author{name, imgUrl} id body createdAt}}`,
+      };
+
+      const response = await axios.post(endpoint, graphqlQuery, headers);
+      replies.value = await response.data.data.commentReplies;
+    } catch (err) {
+      console.log(err);
+    }
   });
   return { replies };
 };
@@ -134,8 +141,8 @@ export default {
       this.reply = !this.reply;
     },
   },
-  computed:{
-    ...mapGetters(['user'])
+  computed: {
+    ...mapGetters(["user"]),
   },
   props: {
     data: {

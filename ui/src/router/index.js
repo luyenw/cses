@@ -3,6 +3,9 @@ import ProblemList from '@/components/pages/ProblemList'
 import ProblemPage from '@/components/pages/problem/ProblemPage'
 import LoginPage from '@/components/pages/LoginPage'
 import SignupPage from '@/components/pages/SignupPage'
+import ContestPage from '@/components/pages/contest/ContestPage'
+import ContestProblemList from '@/components/pages/contest/ContestProblemList'
+import ContestProblemPage from '@/components/pages/contest/ContestProblemPage'
 import NotFound from '@/components/pages/NotFound'
 import ProfilePage from '@/components/pages/ProfilePage'
 import LMSPage from '@/components/pages/LMSPage'
@@ -17,7 +20,7 @@ const routes = [
 
     },
     {
-        path: '/task/:id',
+        path: '/problems/:id',
         component: ProblemPage
     },
     {
@@ -29,12 +32,24 @@ const routes = [
         component: SignupPage
     },
     {
-        path: '/user/:id',
+        path: '/users/:id',
         component: ProfilePage
     },
     {
         path: '/course/:id',
         component: CourseMain
+    },
+    {
+        path: '/contests/',
+        component: ContestPage
+    },
+    {
+        path: '/contests/:id',
+        component: ContestProblemList
+    },
+    {
+        path: '/contests/:contest_id/problems/:problem_id',
+        component: ContestProblemPage
     },
     {
         path: '/course/:id/page/:page_id',
@@ -45,7 +60,7 @@ const routes = [
         component: LMSPage
     },
     {
-        path: '/submit/view/:id',
+        path: '/submit/:id/view',
         component: SubmissionView
     },
     {

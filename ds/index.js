@@ -1,12 +1,15 @@
+require("dotenv").config();
 const express = require('express')
 const {graphqlHTTP} = require('express-graphql')
 const {buildSchema} = require('graphql')
 const eurekaHelper = require('./config/eureka/index')
 const app = express()
+
 const connect = require('./config/db/index.js')
 connect()
 const cors = require('cors')
-const allowedOrigins = ['localhost',"http://localhost:8080", "http://127.0.0.1:8080","http://localhost:8080/"];
+const apiUrl = process.env.API_URL
+const allowedOrigins = [`${apiUrl}:8082/`];
 var corsOptions = {
   origin: function (origin, callback) {
     if (allowedOrigins.indexOf(origin) !== -1) {

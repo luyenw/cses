@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoggedIn">Login to see your submissions.</div>
-  <div v-else class="p-4">
+  <div v-else class="p-4 lg:w-2/3 md:w-full sm:w-full">
     <ProblemResultTable :data="submissions" />
   </div>
 </template>
@@ -17,20 +17,28 @@ export default {
     const submissions = ref([]);
     onMounted(async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3001/submit/${props.id}`
-        );
-        submissions.value = response.data.sort((a, b)=>{
-          if(a.createdAt < b.createdAt) return 1;
-          return -1
+        const apiUrl = process.env.VUE_APP_API_URL;
+        var endpoint = `${apiUrl}:3001/problems/${props.id}/submit/user`;
+        if (props.contest_id != 0)
+          endpoint = `${apiUrl}:3001/contests/${props.contest_id}/problems/${props.id}/submit/user`;
+
+        const response = await axios.get(endpoint);
+        submissions.value = response.data.sort((a, b) => {
+          if (a.createdAt < b.createdAt) return 1;
+          return -1;
         });
-        console.log(response.data);
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     });
     return { submissions, constant };
   },
   props: {
     id: Number,
+    contest_id: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),

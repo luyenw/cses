@@ -17,7 +17,7 @@
           aria-orientation="vertical"
           aria-labelledby="dropdown-button"
         >
-          <router-link :to="'/user/' + data.id">
+          <router-link :to="'/users/' + data.id">
             <a
               class="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               role="menuitem"
@@ -79,8 +79,9 @@ export default {
     return {
       signout: () => {
         store.commit("setUser", null);
+        const apiUrl = process.env.VUE_APP_API_URL;
         document.cookie =
-          "access_token=; expires=" + new Date() + "; domain=localhost;Path=/";
+          "access_token=; expires=" + new Date() + `; domain=${apiUrl};Path=/`;
         router.push("/login");
       },
     };

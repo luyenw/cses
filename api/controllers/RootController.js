@@ -1,5 +1,5 @@
 const controller = {}
-const Task = require('../schemas/Task')
+const Problem = require('../schemas/Problem')
 const bcrypt = require('bcrypt')
 const User = require('../schemas/User')
 const jwt = require('jsonwebtoken')
@@ -7,22 +7,22 @@ const {Validation} = require('../validations/validations')
 module.exports=()=>{
     controller.get= async (req, res)=>{
         // var start = new Date()
-        const tasks = await Task.findAll()
-        return res.json(tasks)
+        const problems = await Problem.findAll()
+        return res.json(problems)
     }
     controller.get_login = async (req, res)=>{
-        const tasks = await Task.findAll({})
-        return res.json(tasks)
+        const problems = await Problem.findAll({})
+        return res.json(problems)
     }
     controller.post_register= async(req, res)=>{
         const inp = req.body
+        console.log(inp)
         try{
             const validatedDate = Validation.validateRegister(inp)
             const user = await User.findOne({where:{username: inp.username}})
             if (user){
                 console.log(user)
-                res.status(422).json({'msg': 'username is exist'})
-                return 
+                return res.status(422).json({'msg': 'username is exist'})
             }
             const salt = await bcrypt.genSalt(10)
             const hash_password = await bcrypt.hash(inp.password, salt)
@@ -34,11 +34,10 @@ module.exports=()=>{
             })
             returned_user = await User.create(new_user.dataValues)
             if(returned_user){
-                
-                res.json(returned_user)
+                return res.status(200).json({'data': returned_user})
             }
         }catch (error) {
-            res.status(422).json({'Validation error:': error.message});
+            return res.status(422).json({'Validation error:': error.message});
         }
     }
     controller.post_login= async (req, res)=>{
@@ -51,10 +50,10 @@ module.exports=()=>{
         if (compare_password == false){
             return res.status(422).json({'msg': 'username or password is not correct'})
         }
-        const accessToken = jwt.sign({id: user.id, username: inp.username, password: user.password}, process.env.ACCESS_SECRET_TOKEN);
+        const accessToken = jwt.sign({id: user.id, username: inp.username}, process.env.ACCESS_SECRET_TOKEN);
         return res.setHeader(
             'set-cookie', `access_token=${accessToken}`
-        ).status(200).send({token: accessToken, user: user});
+        ).status(200).send({token: accessToken});
         
     }
     controller.globalData=async(req,res)=>{

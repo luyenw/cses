@@ -10,7 +10,8 @@ const tokenAuthorize = async (req, res, next) =>{
         const config = {
             headers: { Authorization: `Bearer ${token}` }
         };
-        const response = await axios.post('http://localhost:3004/verify', "", config)
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const response = await axios.post(`${apiUrl}:3004/verify`, "", config)
         res.locals.user = response.data
         console.log(response.data)
         next();

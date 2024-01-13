@@ -18,7 +18,8 @@ const connect = async () =>{
             'Luyendkdk1',
             {
                 host: '127.0.0.1',
-                dialect: 'mysql'
+                dialect: 'mysql',
+                logging: false
             }
         );
         sequelize.authenticate().then(() => {

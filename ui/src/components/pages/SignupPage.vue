@@ -92,8 +92,8 @@
           </span>
         </div>
       </div>
-      <Alert v-if="error&&!success" :msg="error_detail"/>
-      <Success v-if="success" msg="Account has been successfully created."/>
+      <Alert v-if="error && !success" :msg="error_detail" />
+      <Success v-if="success" msg="Account has been successfully created." />
       <div class="flex items-center justify-between">
         <p class="text-sm text-gray-500">
           Already have an account?
@@ -111,43 +111,44 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
-import Alert from '@/components/Alert.vue';
-import Success from '../Success.vue';
+import axios from "axios";
+import Alert from "@/components/Alert.vue";
+import Success from "../Success.vue";
 
 export default {
-    name: "SignupPage",
-    data: () => {
-        return {
-            username: "",
-            password: "",
-            name: "",
-            error: false,
-            error_detail: "",
-            success: false
-        };
+  name: "SignupPage",
+  data: () => {
+    return {
+      username: "",
+      password: "",
+      name: "",
+      error: false,
+      error_detail: "",
+      success: false,
+    };
+  },
+  methods: {
+    async signup(e) {
+      e.preventDefault();
+      try {
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const response = await axios.post(`${apiUrl}:3001/register`, {
+          username: this.username,
+          password: this.password,
+          name: this.name,
+        });
+        this.success = true;
+      } catch (err) {
+        this.error = true;
+        console.log(err)
+        var output = "";
+        for (const [key, value] of Object.entries(err.response.data)) {
+          output += value;
+        }
+        this.error_detail = output;
+      }
     },
-    methods: {
-        async signup(e) {
-            e.preventDefault();
-            try {
-                const resposne = await axios.post("http://localhost:3001/register", {
-                    username: this.username,
-                    password: this.password,
-                    name: this.name
-                });
-                this.success=true
-              }
-              catch (err) {
-                this.error = true;
-                var output = ""
-                for (const [key, value] of Object.entries(err.response.data)) {
-                  output += value
-                }
-                this.error_detail = output
-            }
-        },
-    },
-    components: { Alert, Success }
+  },
+  components: { Alert, Success },
 };
 </script>

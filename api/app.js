@@ -15,11 +15,10 @@ mq.createQueue("task_queue")
 // middlewares
 //https://stackoverflow.com/questions/51224668/axios-cross-domain-cookies
 const cors = require("cors");
+const apiUrl = process.env.API_URL
 const allowedOrigins = [
-  "localhost",
-  "http://localhost:8080",
-  "http://127.0.0.1:8080",
-  "http://localhost:8082/",
+  `${apiUrl}`,
+  `${apiUrl}:8082/`,
 ];
 var corsOptions = {
   origin: function (origin, callback) {
@@ -39,18 +38,20 @@ app.use(bodyParser.json({ limit: "200mb" }));
 app.use(cookieParser());
 // routers
 const rootRouter = require("./routers/RootRouter")();
-const taskRouter = require("./routers/TaskRouter")();
+const problemRouter = require("./routers/ProblemRouter")();
 const submitRouter = require("./routers/SubmitRouter")()
 const resultRouter = require("./routers/ResultRouter")
 const userRouter = require("./routers/UserRouter");
+const contestRouter = require("./routers/ContestRouter");
 const resolvers = require("./controllers/graphql");
 const schema = require("./schemas/graphql");
 //
 app.use("/", rootRouter);
-app.use("/task", taskRouter);
+app.use("/problems", problemRouter);
 app.use("/submit", submitRouter);
 app.use("/result", resultRouter);
-app.use("/user", userRouter);
+app.use("/users", userRouter);
+app.use("/contests", contestRouter);
 app.use(
   "/graphql",
   graphqlHTTP({

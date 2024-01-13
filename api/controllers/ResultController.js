@@ -1,7 +1,7 @@
 const User = require("../schemas/User");
 const Result = require("../schemas/Result");
 const Submission = require("../schemas/Submission");
-const Task = require("../schemas/Task");
+const Problem = require("../schemas/Problem");
 const TestCase = require("../schemas/Testcase");
 const controller = {};
 controller.get = async (req, res) => {
@@ -13,7 +13,7 @@ controller.get = async (req, res) => {
   user = user.dataValues;
   if (user.id != submission.user_id) return res.json({ msg: "not found" });
   const test_cases = await TestCase.findAll({
-    where: { task_id: submission.task_id },
+    where: { problem_id: submission.problem_id },
   });
   var results = [];
   for (var i = 0; i < test_cases.length; i++) {

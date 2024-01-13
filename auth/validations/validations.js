@@ -14,12 +14,12 @@ class Validation{
 
   }
   static submissionSchema = Joi.object({
-    task_id: Joi.number().integer().min(0).required(),
+    problem_id: Joi.number().integer().min(0).required(),
     user_id: Joi.number().integer().min(0).required(),
     lang: Joi.string().valid('c', 'cpp', 'python').required(),
     source_code: Joi.string().required()
   });
-  static taskSchema = Joi.object({
+  static problemSchema = Joi.object({
       title: Joi.string().required(),
       content: Joi.string().required(),
       difficulty: Joi.string().valid('Easy', 'Medium', 'Hard').required(),
@@ -45,8 +45,8 @@ class Validation{
   static validateRegister(inp){
     return Validation.validate(inp, Validation.registerSchema)
   }
-  static validateTask(inp){
-    return Validation.validate(inp, Validation.taskSchema)
+  static validateProblem(inp){
+    return Validation.validate(inp, Validation.problemSchema)
   }
   static validateSubmission(inp){
     return Validation.validate(inp, Validation.submissionSchema)
