@@ -65,10 +65,15 @@ export default {
     const id = route.params.id;
     onMounted(async () => {
       try {
-        const apiUrl = process.env.API_URL
-        const response = await axios.get(`${apiUrl}:3001/users/${id}`);
+        const apiUrl = process.env.VUE_APP_API_URL
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get(`${apiUrl}:3001/users/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         user.value = await response.data;
-        console.log(user.value);
+        console.log("user", user.value);
       } catch (err) {}
     });
     return { user };

@@ -30,7 +30,8 @@ module.exports=()=>{
             const new_user = new User({
                 username: inp.username,
                 password: hash_password,
-                name: inp.name
+                name: inp.name,
+                role: 'user'
             })
             returned_user = await User.create(new_user.dataValues)
             if(returned_user){
@@ -50,7 +51,7 @@ module.exports=()=>{
         if (compare_password == false){
             return res.status(422).json({'msg': 'username or password is not correct'})
         }
-        const accessToken = jwt.sign({id: user.id, username: inp.username}, process.env.ACCESS_SECRET_TOKEN);
+        const accessToken = jwt.sign({id: user.id, username: inp.username, role: user.role}, process.env.ACCESS_SECRET_TOKEN);
         return res.setHeader(
             'set-cookie', `access_token=${accessToken}`
         ).status(200).send({token: accessToken});

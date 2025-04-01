@@ -19,7 +19,12 @@ export default {
         if (props.contest_id != 0)
           endpoint = `${apiUrl}:3001/contests/${props.contest_id}/problems/${props.id}/submit`;
 
-        const response = await axios.get(endpoint);
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get(endpoint, {
+            headers: {
+            Authorization: `Bearer ${token}`
+            }
+          });
         data.value = response.data;
       } catch (err) {
         console.log(err);

@@ -82,9 +82,14 @@ export default {
     console.log(apiUrl)
     onMounted(async () => {
       try {
-        console.log(`${apiUrl}:3001/globalData`)
-        const response = await axios.get(`${apiUrl}:3001/globalData`);
-        console.log(response.status);
+        const token = localStorage.getItem('access_token');
+        console.log(token)
+        const response = await axios.get(`${apiUrl}:3001/globalData`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log(response)
         if (response.data.msg?.name == "JsonWebTokenError") {
           store.commit("setUser", null);
         } else store.commit("setUser", response.data);

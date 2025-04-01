@@ -49,9 +49,15 @@ export default {
     const data = ref([]);
     onMounted(async () => {
       try {
+        const token = localStorage.getItem('access_token');
         const apiUrl = process.env.VUE_APP_API_URL;
         const response = await axios.get(
-          `${apiUrl}:3001/submit/${submission_id}/details`
+          `${apiUrl}:3001/submit/${submission_id}/details`,
+          {
+            headers: {
+            Authorization: `Bearer ${token}`
+            }
+          }
         );
         console.log(response.data);
         data.value = response.data;

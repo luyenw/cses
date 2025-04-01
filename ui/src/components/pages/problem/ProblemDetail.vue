@@ -123,9 +123,15 @@ export default {
           source_code: source_code,
         };
         const apiUrl = process.env.VUE_APP_API_URL;
+        const token = localStorage.getItem('access_token');
         const response = await axios.post(
-          `${apiUrl}:3001/submit`,
-          body
+          `${apiUrl}:3001/submit`, 
+          body,
+          {
+            headers: {
+            Authorization: `Bearer ${token}`
+            }
+          }
         );
         toast.success("Submit sucessfully!", {
           autoClose: 3000,

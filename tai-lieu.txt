@@ -1,0 +1,12 @@
+chay api:
+docker compose up 
+npm i -f
+npm run test
+
+chay auth:
+npm i -f 
+npm run test
+
+chay ui
+npm i -f
+npm run serve

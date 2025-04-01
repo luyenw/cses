@@ -74,8 +74,13 @@ export default {
           username: this.username,
           password: this.password,
         });
-        console.log(response)
-        const globalData = await axios.get(`${apiUrl}:3001/globalData`);
+        const token = response.data.token;
+        localStorage.setItem('access_token', token);
+        const globalData = await axios.get(`${apiUrl}:3001/globalData`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         this.$store.commit("setUser", globalData.data);
         this.$router.push({ path: '/', replace: true })
       } catch (err) {
