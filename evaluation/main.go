@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
-	"fmt"
-	"time"
+	"strings"
 	"sync"
+	"time"
 
+	"github.com/docker/docker/pkg/jsonmessage"
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/docker/docker/api/types"
@@ -24,7 +26,7 @@ import (
 
 var ctx context.Context
 var cli *client.Client
-var mu  sync.Mutex
+var mu sync.Mutex
 
 type SubmissionJson struct {
 	Id        string `json:"id"`
@@ -87,7 +89,7 @@ const (
 
 func testcasesByProblemId(problemId int64) ([]Input, error) {
 	rows, err := config.GetDB().Query("select id, input, output from test_cases where problem_id = ?", problemId)
-	if(err!=nil){
+	if err != nil {
 		return nil, errors.New("cannot get testcases")
 	}
 	// Loop through rows, using Scan to assign column data to struct fields.
@@ -105,13 +107,13 @@ func testcasesByProblemId(problemId int64) ([]Input, error) {
 	return inputs, nil
 }
 func createTestResult(testResult TestResult) error {
-// 	var result TestResult
-// 	err := config.GetDB().QueryRow(`
-//     INSERT INTO results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) 
-//     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-//     RETURN submission_id, testcase_id, user_output, verdict, code_time, code_size
-// `	, testResult.submissionId, testResult.testcaseId, testResult.userOutput, testResult.verdict, testResult.codeTime, testResult.codeSize, time.Now(), time.Now()).Scan(
-//     &result.submissionId, &result.testcaseId, &result.userOutput, &result.verdict, &result.codeTime, &result.codeSize)
+	// 	var result TestResult
+	// 	err := config.GetDB().QueryRow(`
+	//     INSERT INTO results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt)
+	//     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	//     RETURN submission_id, testcase_id, user_output, verdict, code_time, code_size
+	// `	, testResult.submissionId, testResult.testcaseId, testResult.userOutput, testResult.verdict, testResult.codeTime, testResult.codeSize, time.Now(), time.Now()).Scan(
+	//     &result.submissionId, &result.testcaseId, &result.userOutput, &result.verdict, &result.codeTime, &result.codeSize)
 
 	// Execute the SQL statement
 	_, err := config.GetDB().Exec("INSERT INTO results (submission_id, testcase_id, user_output, verdict, code_time, code_size, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -131,6 +133,21 @@ func updateTestResult(testResult TestResult) (int64, error) {
 	}
 	return id, nil
 }
+
+func getContainerRuntime(ctx context.Context, cli *client.Client, containerID string) (time.Time, error) {
+	inspect, err := cli.ContainerInspect(ctx, containerID)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	startTime, err := time.Parse(time.RFC3339, inspect.State.StartedAt)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return startTime, nil
+}
+
 func updateSubmission(submissionId string, status Status, passed string) (int64, error) {
 	result, err := config.GetDB().Exec("update submissions set status=?, passed=?, updatedAt=? where id=?",
 		status, passed, time.Now(), submissionId)
@@ -197,7 +214,9 @@ func copyFileContents(src, dst string) (err error) {
 
 func prepair(body SubmissionJson, testcases []Input) {
 	err := os.MkdirAll(body.Id+"/inputs", 0777)
+	failOnError(err, "Failed to make dirs")
 	err = os.MkdirAll(body.Id+"/outputs", 0777)
+	failOnError(err, "Failed to make dirs")
 	err = os.MkdirAll(body.Id+"/user_outputs", 0777)
 	failOnError(err, "Failed to make dirs")
 	err = os.WriteFile(body.Id+"/main.cpp", []byte(body.Source), 0777)
@@ -209,16 +228,17 @@ func prepair(body SubmissionJson, testcases []Input) {
 
 	for _, testcase := range testcases {
 		err = os.WriteFile(body.Id+"/inputs/"+testcase.id+".txt", []byte(testcase.input), 0777)
+		failOnError(err, "Failed to make dirs")
 		err = os.WriteFile(body.Id+"/outputs/"+testcase.id+".txt", []byte(testcase.output), 0777)
 		failOnError(err, "Failed to write testcase")
 		err = createTestResult(TestResult{body.Id, testcase.id, "", 0, 0, 0})
-		// failOnError(err, "Failed to insert new test result"+err.Error())
+		failOnError(err, "Failed to insert new test result")
 	}
 }
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Printf("%s", msg)
+		log.Printf("%s: %s", msg, err.Error())
 	}
 }
 func print(rd io.Reader) error {
@@ -245,32 +265,50 @@ func imageBuild(dockerClient *client.Client, contextPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
 	defer cancel()
 
-	tar, err := archive.TarWithOptions(contextPath, &archive.TarOptions{})
+	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+	fullPath := pwd + "/" + contextPath
+	log.Println("Building image from:", fullPath)
+
+	tar, err := archive.TarWithOptions(fullPath, &archive.TarOptions{})
+	if err != nil {
+		return err
+	}
+	defer tar.Close()
 
 	opts := types.ImageBuildOptions{
 		Dockerfile: "Dockerfile",
 		Tags:       []string{contextPath},
 		Remove:     true,
+		// Platform:   "linux/amd64", //Optional: specify platform
 	}
+
 	res, err := dockerClient.ImageBuild(ctx, tar, opts)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	err = print(res.Body)
+	// Improved error handling to capture Docker build errors
+	err = jsonmessage.DisplayJSONMessagesStream(res.Body, os.Stdout, os.Stdout.Fd(), os.Getenv("DEBUG") != "", func(jm jsonmessage.JSONMessage) {
+		if jm.Error != nil {
+			log.Printf("Docker build error: %s\n", jm.Error.Message)
+		}
+	})
+
 	if err != nil {
 		return err
 	}
 
+	log.Println("Image build successful:", contextPath)
 	return nil
 }
+
 func containerRun(dockerClient *client.Client, imageID string) error {
 	pwd, err := os.Getwd()
+	failOnError(err, "os.Getwd()")
 	resp, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image: imageID,
 	}, &container.HostConfig{
@@ -278,14 +316,12 @@ func containerRun(dockerClient *client.Client, imageID string) error {
 			pwd + "/" + imageID + "/user_outputs:/app/user_outputs",
 		},
 	}, nil, nil, "")
+	failOnError(err, "dockerClient.ContainerCreate")
 	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	return err
 }
 func standardGrading(input string, output string) bool {
-	if input == output {
-		return true
-	}
-	return false
+	return input == output
 }
 func evaluate(msg []byte, channel chan string) {
 	channel <- string(msg)
@@ -299,17 +335,17 @@ func evaluate(msg []byte, channel chan string) {
 	}
 	//
 	inputs, err := testcasesByProblemId(int64(submission.ProblemId))
+	failOnError(err, "testcasesByProblemId")
 	prepair(submission, inputs)
-	defer os.RemoveAll(submission.Id)
 	// build docker image
 	err = imageBuild(cli, submission.Id)
 	if err != nil {
-		log.Printf("failed when build docker image")
+		log.Printf("failed when build docker image, %s", err.Error())
 		for _, input := range inputs {
 			updateTestResult(TestResult{
 				submission.Id,
 				input.id,
-				"",
+				err.Error(),
 				VERDICT_COMPILE_ERROR,
 				0,
 				0,
@@ -320,13 +356,12 @@ func evaluate(msg []byte, channel chan string) {
 	}
 	err = containerRun(cli, submission.Id)
 	if err != nil {
-		log.Printf("Failed when start docker container")
-		log.Printf("%s", err.Error())
+		log.Printf("Failed when start docker container, %s", err.Error())
 		for _, input := range inputs {
 			updateTestResult(TestResult{
 				submission.Id,
 				input.id,
-				"",
+				err.Error(),
 				VERDICT_COMPILE_ERROR,
 				0,
 				0,
@@ -338,10 +373,10 @@ func evaluate(msg []byte, channel chan string) {
 		for _, input := range inputs {
 			user_output, err := os.ReadFile(submission.Id + "/user_outputs/" + input.id + ".txt")
 			if err != nil {
-				log.Printf(err.Error())
+				log.Println(err.Error())
 			}
 			verdict := VERDICT_WRONG_ANSWER
-			if standardGrading(string(user_output), input.output) {
+			if standardGrading(strings.TrimSpace(string(user_output)), strings.TrimSpace(input.output)) {
 				verdict = VERDICT_ACCEPTED
 			} else {
 				verdict = VERDICT_WRONG_ANSWER
@@ -374,7 +409,7 @@ func main() {
 		panic(err)
 	}
 	defer cli.Close()
-	
+
 	config.MySQLInit()
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
